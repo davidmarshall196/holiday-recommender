@@ -218,7 +218,7 @@ adults = 1
 children = 1
 currency = 'GBP'
 
-place_country = {'Place': 'Courchevel', 'Country': 'France'}
+place_country = {'Place': 'Bangkok', 'Country': 'Thailand'}
 
 
 # Extract lat, long
@@ -325,10 +325,11 @@ hotels = api_functions.fetch_hotels_by_location(
     longitude = given_lon
 )
 
-bc = 4
+bc = 0.05
 
 # Define a rough bounding box
 bbox = f"{given_lat-bc},{given_lon-bc},{given_lat+bc},{given_lon+bc}"
+
 
 url = "https://apidojo-booking-v1.p.rapidapi.com/properties/list-by-map"
 headers = {
@@ -357,3 +358,54 @@ querystring = {
 response = requests.get(url, headers=headers, params=querystring)
 response_json = response.json()
 data = create_hotel_dataframe(response_json)
+
+import boto3
+
+session = boto3.Session(profile_name='david-gmail-acc')
+ssm_client = session.client('ssm')
+
+# Name of the parameter you want to retrieve
+parameter_name = "FLIGHTS_API_KEY"
+
+# Call the get_parameter method
+response = ssm_client.get_parameter(
+    Name=parameter_name,
+    WithDecryption=False
+)
+
+# Extract the parameter value
+FLIGHTS_API_KEY = response['Parameter']['Value']
+
+
+# Load flights
+airports = pd.read_csv(
+    '/Users/david@inawisdom.com/Documents/Training/travel_app/data/large_airports.csv')
+
+# Load airlines
+airlines = pd.read_csv(
+    '/Users/david@inawisdom.com/Documents/Training/travel_app/data/airlines_small.csv')
+
+import pandas as pd
+airports = pd.read_csv('s3://holiday-recommender-app/data/large_airports.csv')
+
+
+import pandas as pd
+import boto3
+import api_functions
+
+
+airports = api_functions.grab_data_s3(constants.AIRPORTS_DATA_PATH)
+airlines = api_functions.grab_data_s3(constants.AIRLINES_DATA_PATH)    
+
+bucket = "holiday-recommender-app"
+file_name = "data/large_airports.csv"
+session = boto3.Session(profile_name='david-gmail-acc')
+
+import importlib
+importlib.reload(constants)
+import constants
+
+
+
+
+

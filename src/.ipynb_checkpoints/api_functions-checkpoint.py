@@ -1,4 +1,4 @@
-from typing import Dict, Union, Any, Optional, List
+from typing import Dict, Union, Any, Optional, List, Tuple
 from geopy.geocoders import Nominatim
 import requests
 import os
@@ -13,8 +13,132 @@ import constants
 import config
 from amadeus import Client, ResponseError
 import streamlit as st
+import boto3
+import pandas as pd
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError
+from PIL import Image
+import boto3
+import io
 
+def grab_data_s3(
+    file_path: str, 
+    bucket: str = constants.S3_BUCKET,
+    profile_name: Optional[str] = 'david-gmail-acc'
+) -> pd.DataFrame:
+    """
+    Retrieve data from an S3 bucket and return a DataFrame.
 
+    :param bucket: Name of the S3 bucket.
+    :type bucket: str
+    :param file_path: Path to the file within the S3 bucket.
+    :type file_path: str
+    :param profile_name: AWS profile name (optional).
+    :type profile_name: Optional[str]
+    :return: DataFrame containing the data from the S3 file.
+    :rtype: pd.DataFrame
+    :raises NoCredentialsError: If credentials are missing.
+    :raises PartialCredentialsError: If credentials are incomplete.
+    """
+    try:
+        session = boto3.Session(profile_name=profile_name)
+        s3 = session.client('s3')  # Create a connection to S3
+        obj = s3.get_object(Bucket=bucket, Key=file_path)  # Get object and file from bucket
+        airports = pd.read_csv(obj['Body'])
+        return airports
+    except NoCredentialsError:
+        raise NoCredentialsError("Credentials not available. Make sure the profile name is correct and the credentials are set up properly.")
+    except PartialCredentialsError:
+        raise PartialCredentialsError("Incomplete credentials. Please check your AWS configuration.")
+    except Exception as e:
+        raise Exception(f"An unexpected error occurred: {str(e)}")
+
+def grab_image_s3( 
+    file_path: str, 
+    bucket: str = constants.S3_BUCKET,
+    profile_name: Optional[str] = 'david-gmail-acc'
+) -> Image.Image:
+    """
+    Retrieve a JPEG image from an S3 bucket and return a PIL Image object.
+
+    :param bucket: Name of the S3 bucket.
+    :type bucket: str
+    :param file_path: Path to the JPEG file within the S3 bucket.
+    :type file_path: str
+    :param profile_name: AWS profile name (optional).
+    :type profile_name: Optional[str]
+    :return: PIL Image object containing the JPEG image.
+    :rtype: Image.Image
+    :raises NoCredentialsError: If credentials are missing.
+    :raises PartialCredentialsError: If credentials are incomplete.
+    :raises Exception: If the file is not a JPEG or another unexpected error occurs.
+    """
+    try:
+        session = boto3.Session(profile_name=profile_name)
+        s3 = session.client('s3')  # Create a connection to S3
+        obj = s3.get_object(Bucket=bucket, Key=file_path)  # Get object and file from bucket
+        image_stream = io.BytesIO(obj['Body'].read())
+        image = Image.open(image_stream)
+
+        if image.format != 'JPEG':
+            raise Exception("The provided file is not a JPEG image.")
+
+        return image
+    except NoCredentialsError:
+        raise NoCredentialsError("Credentials not available. Make sure the profile name is correct and the credentials are set up properly.")
+    except PartialCredentialsError:
+        raise PartialCredentialsError("Incomplete credentials. Please check your AWS configuration.")
+    except Exception as e:
+        raise Exception(f"An unexpected error occurred: {str(e)}")
+
+def save_image_s3(
+    image: Image.Image, 
+    file_path: str, 
+    bucket: str = constants.S3_BUCKET,
+    profile_name: Optional[str] = 'david-gmail-acc'
+) -> None:
+    """
+    Save a JPEG image to an S3 bucket.
+
+    :param image: PIL Image object to be saved.
+    :type image: Image.Image
+    :param bucket: Name of the S3 bucket.
+    :type bucket: str
+    :param file_path: Path to save the JPEG file within the S3 bucket.
+    :type file_path: str
+    :param profile_name: AWS profile name (optional).
+    :type profile_name: Optional[str]
+    :raises NoCredentialsError: If credentials are missing.
+    :raises PartialCredentialsError: If credentials are incomplete.
+    :raises Exception: If the image is not in JPEG format or another unexpected error occurs.
+    """
+    try:
+        # Check if the image is in JPEG format
+        if image.format != 'JPEG':
+            raise Exception("The provided image is not in JPEG format.")
+
+        # Convert the image to a byte stream
+        image_stream = io.BytesIO()
+        image.save(image_stream, format='JPEG')
+
+        # Create a boto3 session and client for S3
+        session = boto3.Session(profile_name=profile_name)
+        s3 = session.client('s3')  # Create a connection to S3
+
+        # Upload the image to the specified bucket and file path
+        s3.put_object(
+            Bucket=bucket, 
+            Key=file_path, 
+            Body=image_stream.getvalue(), 
+            ContentType='image/jpeg'
+        )
+    except NoCredentialsError:
+        raise NoCredentialsError("Credentials not available. Make sure the profile name is correct and the credentials are set up properly.")
+    except PartialCredentialsError:
+        raise PartialCredentialsError("Incomplete credentials. Please check your AWS configuration.")
+    except Exception as e:
+        raise Exception(f"An unexpected error occurred: {str(e)}")
+
+        
 def format_duration(duration):
     """
     Convert duration in the format 'PT3H40M' or 'PT3H' or 'PT40M' to 
@@ -91,9 +215,7 @@ def fetch_and_extract_destination(
     - dict: A dictionary containing the recommended place and country.
     """
     if constants.TESTING:
-        text_content = """
-I suggest you visit Rhodes, Greece for your holiday. Rhodes is known for its windy weather, making it an ideal destination for those who enjoy walking and outdoor activities. The island offers numerous scenic trails and coastal paths where you can explore its natural beauty. In addition to the great weather and walking opportunities, Rhodes is famous for its Mediterranean cuisine. You can indulge in delicious Greek dishes, including fresh seafood, moussaka, souvlaki, and tzatziki. Moreover, Rhodes offers affordable accommodations and dining options, making it a perfect choice for travelers on a budget.
-        """
+        text_content = constants.TESTING_TEXT_CONTENT
         
         place_country = {'Place': 'Rhodes', 'Country': 'Greece'}
     
@@ -620,8 +742,9 @@ def get_photo_of_place(
 
     response = requests.get(photo_endpoint, params=photo_params)
     if response.status_code == 200:
-        with open(filepath, "wb") as f:
-            f.write(response.content)
+        #with open(filepath, "wb") as f:
+        #    f.write(response.content)
+        save_image_s3(response.content, filepath)
         print(f"Photo saved as {filepath}")
     else:
         print("Error fetching the photo")

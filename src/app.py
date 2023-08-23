@@ -15,12 +15,10 @@ import textwrap
 openai.api_key = config.NEW_OPENAI_KEY
 
 # Load flights
-airports = pd.read_csv(
-    '/Users/david@inawisdom.com/Documents/Training/travel_app/data/large_airports.csv')
+airports = api_functions.grab_data_s3(constants.AIRPORTS_DATA_PATH)
 
 # Load airlines
-airlines = pd.read_csv(
-    '/Users/david@inawisdom.com/Documents/Training/travel_app/data/airlines_small.csv')
+airlines = api_functions.grab_data_s3(constants.AIRLINES_DATA_PATH)    
 
 # Wide layout
 st.set_page_config(layout="wide")
@@ -294,7 +292,8 @@ if return_date > departure_date and departure_date > date.today() and rooms <= (
 
     with col2:
         if filename:
-            st.image(filename)
+            st.image(f's3://{constants.S3_BUCKET}/{filename}')
+            #st.image(filename)
         # View on map
         if st.session_state.TESTING:
             st.image(
