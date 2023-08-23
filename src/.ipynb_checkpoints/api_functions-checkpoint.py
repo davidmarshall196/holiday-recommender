@@ -10,6 +10,7 @@ import math
 import pandas as pd
 from datetime import datetime
 import constants
+import config
 from amadeus import Client, ResponseError
 import streamlit as st
 
@@ -124,7 +125,6 @@ I suggest you visit Rhodes, Greece for your holiday. Rhodes is known for its win
     
         # Extract place and country from the response content
     return text_content, place_country
-
 
 
 def get_lat_lon(place: str, country: str) -> Optional[Dict[str, float]]:
@@ -490,7 +490,8 @@ def get_flight_offers(
     destination_code_med: str, 
     destination_code_large: str,
     date: str, 
-    airlines
+    airlines: pd.DataFrame,
+    adults: str
 ) -> dict:
     """
     Get flight offers for a given origin, destination, and month using the Amadeus Flight Offers Search API.
@@ -505,6 +506,9 @@ def get_flight_offers(
     Returns:
     - dict: Flight offers.
     """
+    if isinstance(adults, int):
+        adults = str(adults)
+    
     if constants.TESTING:
         airport_type = {}
         airport_type['type'] = 'medium'
@@ -513,8 +517,8 @@ def get_flight_offers(
     
     else:
         amadeus = Client(
-            client_id=constants.FLIGHTS_API_KEY,
-            client_secret=constants.FLIGHTS_API_SECRET
+            client_id=config.FLIGHTS_API_KEY,
+            client_secret=config.FLIGHTS_API_SECRET
         )
 
         try:
@@ -592,7 +596,7 @@ def get_photo_of_place(
         "input": place_name,
         "inputtype": "textquery",
         "fields": "photos",
-        "key": constants.GOOGLE_API_KEY
+        "key": config.GOOGLE_API_KEY
     }
     
     response = requests.get(places_endpoint, params=params)
@@ -695,8 +699,7 @@ def fetch_hotels_by_location(
     url = "https://apidojo-booking-v1.p.rapidapi.com/properties/list-by-map"
     headers = {
         "x-rapidapi-host": "apidojo-booking-v1.p.rapidapi.com",
-        "x-rapidapi-key": constants.RAPID_API_KEY  
-        # Replace with your RapidAPI key
+        "x-rapidapi-key": config.RAPID_API_KEY  
     }
 
     querystring = {

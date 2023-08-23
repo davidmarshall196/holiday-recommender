@@ -3,13 +3,16 @@ import streamlit as st
 import api_functions
 import openai
 import constants
+import config
 import pydeck as pdk
 import pandas as pd
 from datetime import date, timedelta
 import time
 import textwrap
 
-openai.api_key = constants.NEW_OPENAI_KEY
+# poetry run streamlit run /Users/david@inawisdom.com/Documents/Training/travel_app/src/app.py
+
+openai.api_key = config.NEW_OPENAI_KEY
 
 # Load flights
 airports = pd.read_csv(
@@ -120,7 +123,7 @@ if return_date > departure_date and departure_date > date.today() and rooms <= (
     weather_data = api_functions.get_weather(
             st.session_state.given_lat, 
             st.session_state.given_lon, 
-            constants.WEATHER_API_KEY
+            config.WEATHER_API_KEY
     )
     print(weather_data)
     
@@ -196,7 +199,7 @@ if return_date > departure_date and departure_date > date.today() and rooms <= (
     # Image
     filename = api_functions.get_photo_of_place(
         f"{place_country['Place']}, {place_country['Country']}", 
-        constants.GOOGLE_API_KEY
+        config.GOOGLE_API_KEY
     )
     
     # Hotels
@@ -315,11 +318,7 @@ if return_date > departure_date and departure_date > date.today() and rooms <= (
         st.dataframe(hotels)
         
 
-
-
         
-
         
-
-
-
+        
+        
