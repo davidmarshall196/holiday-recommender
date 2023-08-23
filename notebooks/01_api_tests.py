@@ -358,3 +358,26 @@ querystring = {
 response = requests.get(url, headers=headers, params=querystring)
 response_json = response.json()
 data = create_hotel_dataframe(response_json)
+
+import boto3
+
+session = boto3.Session(profile_name='david-gmail-acc')
+ssm_client = session.client('ssm')
+
+# Name of the parameter you want to retrieve
+parameter_name = "FLIGHTS_API_KEY"
+
+# Call the get_parameter method
+response = ssm_client.get_parameter(
+    Name=parameter_name,
+    WithDecryption=False
+)
+
+# Extract the parameter value
+FLIGHTS_API_KEY = response['Parameter']['Value']
+
+
+
+
+
+
