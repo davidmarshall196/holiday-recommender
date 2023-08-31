@@ -32,3 +32,10 @@ This project is licensed under the MIT License.
 
 - Thanks to OpenAI for the GPT-3 model
 - Thanks to Streamlit for the web framework
+
+## To do list
+- Concurrent requests
+- Unit tests
+- Extention for free text box with content
+- Logging and reporting of usage statistics
+- Deployment
