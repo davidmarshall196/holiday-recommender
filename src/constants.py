@@ -6,7 +6,7 @@ AIRLINES_DATA_PATH = 'data/airlines_small.csv'
 
 S3_BUCKET = 'holiday-recommender-app'
 
-RHODES_SATELLITE_NAME = 'rhodes.png'
+RHODES_SATELLITE_NAME = 'rhodes_map.jpg'
 RHODES_IMAGE = 'Rhodes_Greece.jpg'
 
 BOX_CONSTANT = 0.05

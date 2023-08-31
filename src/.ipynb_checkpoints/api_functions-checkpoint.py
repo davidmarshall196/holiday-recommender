@@ -15,260 +15,14 @@ from amadeus import Client, ResponseError
 import streamlit as st
 import boto3
 import pandas as pd
-from botocore.exceptions import NoCredentialsError, PartialCredentialsError
+from botocore.exceptions import (
+    NoCredentialsError, 
+    PartialCredentialsError, 
+    ClientError
+)
 from PIL import Image
 import boto3
 import io
-
-def grab_data_s3(
-    file_path: str, 
-    bucket: str = constants.S3_BUCKET,
-    profile_name: Optional[str] = 'david-gmail-acc'
-) -> pd.DataFrame:
-    """
-    Retrieve data from an S3 bucket and return a DataFrame.
-
-    :param bucket: Name of the S3 bucket.
-    :type bucket: str
-    :param file_path: Path to the file within the S3 bucket.
-    :type file_path: str
-    :param profile_name: AWS profile name (optional).
-    :type profile_name: Optional[str]
-    :return: DataFrame containing the data from the S3 file.
-    :rtype: pd.DataFrame
-    :raises NoCredentialsError: If credentials are missing.
-    :raises PartialCredentialsError: If credentials are incomplete.
-    """
-    try:
-        session = boto3.Session(profile_name=profile_name)
-        s3 = session.client('s3')  # Create a connection to S3
-        obj = s3.get_object(Bucket=bucket, Key=file_path)  # Get object and file from bucket
-        airports = pd.read_csv(obj['Body'])
-        return airports
-    except NoCredentialsError:
-        raise NoCredentialsError("Credentials not available. Make sure the profile name is correct and the credentials are set up properly.")
-    except PartialCredentialsError:
-        raise PartialCredentialsError("Incomplete credentials. Please check your AWS configuration.")
-    except Exception as e:
-        raise Exception(f"An unexpected error occurred: {str(e)}")
-
-def grab_image_s3( 
-    file_path: str, 
-    bucket: str = constants.S3_BUCKET,
-    profile_name: Optional[str] = 'david-gmail-acc'
-) -> Image.Image:
-    """
-    Retrieve a JPEG image from an S3 bucket and return a PIL Image object.
-
-    :param bucket: Name of the S3 bucket.
-    :type bucket: str
-    :param file_path: Path to the JPEG file within the S3 bucket.
-    :type file_path: str
-    :param profile_name: AWS profile name (optional).
-    :type profile_name: Optional[str]
-    :return: PIL Image object containing the JPEG image.
-    :rtype: Image.Image
-    :raises NoCredentialsError: If credentials are missing.
-    :raises PartialCredentialsError: If credentials are incomplete.
-    :raises Exception: If the file is not a JPEG or another unexpected error occurs.
-    """
-    try:
-        session = boto3.Session(profile_name=profile_name)
-        s3 = session.client('s3')  # Create a connection to S3
-        obj = s3.get_object(Bucket=bucket, Key=file_path)  # Get object and file from bucket
-        image_stream = io.BytesIO(obj['Body'].read())
-        image = Image.open(image_stream)
-
-        if image.format != 'JPEG':
-            raise Exception("The provided file is not a JPEG image.")
-
-        return image
-    except NoCredentialsError:
-        raise NoCredentialsError("Credentials not available. Make sure the profile name is correct and the credentials are set up properly.")
-    except PartialCredentialsError:
-        raise PartialCredentialsError("Incomplete credentials. Please check your AWS configuration.")
-    except Exception as e:
-        raise Exception(f"An unexpected error occurred: {str(e)}")
-
-def save_image_s3(
-    image: Image.Image, 
-    file_path: str, 
-    bucket: str = constants.S3_BUCKET,
-    profile_name: Optional[str] = 'david-gmail-acc'
-) -> None:
-    """
-    Save a JPEG image to an S3 bucket.
-
-    :param image: PIL Image object to be saved.
-    :type image: Image.Image
-    :param bucket: Name of the S3 bucket.
-    :type bucket: str
-    :param file_path: Path to save the JPEG file within the S3 bucket.
-    :type file_path: str
-    :param profile_name: AWS profile name (optional).
-    :type profile_name: Optional[str]
-    :raises NoCredentialsError: If credentials are missing.
-    :raises PartialCredentialsError: If credentials are incomplete.
-    :raises Exception: If the image is not in JPEG format or another unexpected error occurs.
-    """
-    try:
-        # Check if the image is in JPEG format
-        if image.format != 'JPEG':
-            raise Exception("The provided image is not in JPEG format.")
-
-        # Convert the image to a byte stream
-        image_stream = io.BytesIO()
-        image.save(image_stream, format='JPEG')
-
-        # Create a boto3 session and client for S3
-        session = boto3.Session(profile_name=profile_name)
-        s3 = session.client('s3')  # Create a connection to S3
-
-        # Upload the image to the specified bucket and file path
-        s3.put_object(
-            Bucket=bucket, 
-            Key=file_path, 
-            Body=image_stream.getvalue(), 
-            ContentType='image/jpeg'
-        )
-    except NoCredentialsError:
-        raise NoCredentialsError("Credentials not available. Make sure the profile name is correct and the credentials are set up properly.")
-    except PartialCredentialsError:
-        raise PartialCredentialsError("Incomplete credentials. Please check your AWS configuration.")
-    except Exception as e:
-        raise Exception(f"An unexpected error occurred: {str(e)}")
-
-        
-def format_duration(duration):
-    """
-    Convert duration in the format 'PT3H40M' or 'PT3H' or 'PT40M' to 
-    '3hr40m' or '3hr' or '40m'.
-    """
-    hours = 0
-    minutes = 0
-
-    if 'H' in duration:
-        hours = int(duration.split('H')[0].split('T')[-1])
-    if 'M' in duration:
-        minutes_part = duration.split('H')[-1] if 'H' in duration else duration
-        minutes = int(minutes_part.split('M')[0].split('T')[-1])
-    
-    if hours and minutes:
-        return f"{hours}hr{minutes}m"
-    elif hours:
-        return f"{hours}hr"
-    else:
-        return f"{minutes}m"
-
-
-# Define the extraction function
-def extract_place_country(text: str) -> Dict[str, str]:
-    """
-    Extract place and country from the text formatted as "Place: [Place], [Country]".
-    
-    Parameters:
-    - text (str): Text containing the place and country information.
-    
-    Returns:
-    - dict: A dictionary containing the extracted place and country.
-    """
-    
-    pattern = r"([\w\s]+), ([\w\s]+?)(?=\s*[\.\n])"
-    match = re.search(pattern, text)
-    country = text.split('.')[0].strip().split(' ')[-1].replace('.','')
-    place = text.split('.')[0].strip().split(' ')[-2].replace(',','')
-
-    
-    if match:
-        place, country = match.groups()
-        country = country.replace(' for your holiday.','')
-        country = country.replace('\n','').replace('\n','')
-        place = place.replace('I suggest visiting ','')
-        return {
-            "Place": place,
-            "Country": country
-        }
-    else:
-        return {
-            "Place": place,
-            "Country": country
-        }
-        print("Check match correct.")
-
-# Define the combined function
-def fetch_and_extract_destination(
-        weather: str, 
-        activity: str, 
-        food: str,
-        price: str
-) -> Dict[str, str]:
-    """
-    Fetch a holiday recommendation from OpenAI and extract the suggested place and country.
-    
-    Parameters:
-    - weather (str): Preferred weather.
-    - activity (str): Preferred activity.
-    - food (str): Preferred type of food.
-    - price (str): Budget preference.
-    
-    Returns:
-    - dict: A dictionary containing the recommended place and country.
-    """
-    if constants.TESTING:
-        text_content = constants.TESTING_TEXT_CONTENT
-        
-        place_country = {'Place': 'Rhodes', 'Country': 'Greece'}
-    
-    else:
-        
-        # Define the system and user messages
-        system_msg = 'You are a helpful travel agent.'
-        user_msg = (f"""
-                Suggest to me a place for me to go on holiday, based on the following details:\n
-                    1) Weather: {weather}\n
-                    2) Activity: {activity}\n
-                    3) Food: {food}\n
-                    4) Price: {price}\n
-                The first sentence of your response should be the place in the format 'Place, Country' and nothing else. You should then provide a brief description of why you have chosen this place. Provide a specific place rather than a region or country.
-                  """)
-    
-        # Fetch the recommendation from OpenAI
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": system_msg},
-                  {"role": "user", "content": user_msg}],
-            max_tokens=500)
-
-        # Extract the response content
-        text_content = response["choices"][0]["message"]["content"]
-    
-        # Grab place and country
-        place_country = extract_place_country(text_content)
-    
-        # Extract place and country from the response content
-    return text_content, place_country
-
-
-def get_lat_lon(place: str, country: str) -> Optional[Dict[str, float]]:
-    """
-    Fetch the latitude and longitude of a given place and country using Nominatim.
-    
-    Parameters:
-    - place (str): The name of the place.
-    - country (str): The name of the country.
-    
-    Returns:
-    - dict or None: A dictionary containing the latitude and longitude if found, otherwise None.
-    """
-    geolocator = Nominatim(user_agent="geoapiExercises")
-    location = geolocator.geocode(f"{place}, {country}")
-    
-    if location:
-        return {
-            "Latitude": location.latitude,
-            "Longitude": location.longitude
-        }
-    return None
 
 def get_weather(
     lat: float,
@@ -332,150 +86,6 @@ def get_weather(
             raise e from None
         
         
-def print_char_by_char(text: str, delay: float = 0.05) -> None:
-    """
-    Print the given text character by character with a specified delay.
-    
-    Parameters:
-    - text (str): The text to be printed.
-    - delay (float): Delay between each character in seconds.
-    """
-    for char in text:
-        print(char, end='', flush=True)
-        time.sleep(delay)
-    print()
-    
-def simulate_typing_effect(text: str, delay: float = 0.05) -> None:
-    buffer = ""
-    for char in text:
-        buffer += char
-        st.text(buffer)
-        time.sleep(delay)
-        st.experimental_rerun()
-
-
-def haversine_distance(lat1, lon1, lat2, lon2):
-    """
-    Calculate the Haversine distance between two points on the earth (specified in decimal degrees).
-    """
-    R = 6371  # Earth radius in kilometers
-
-    # Convert decimal degrees to radians
-    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
-
-    # Haversine formula
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = math.sin(dlat/2) * math.sin(
-        dlat/2) + math.cos(lat1) * math.cos(
-        lat2) * math.sin(dlon/2) * math.sin(dlon/2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    distance = R * c
-
-    return distance
-
-def nearest_location(lat, lon, locations):
-    """
-    Find the nearest location to a given latitude and longitude.
-
-    Parameters:
-    - lat, lon: Coordinates for which to find the nearest location.
-    - locations: A list of tuples where each tuple is (name, latitude, longitude).
-
-    Returns:
-    - tuple: Name and coordinates of the nearest location.
-    """
-    return min(locations, 
-               key=lambda loc: haversine_distance(
-                   lat, lon, loc[1], loc[2]))
-
-
-def find_nearest_airport(row, given_lat, given_lon):
-    _, lat, lon = nearest_location(
-        given_lat, given_lon, [(row["name"], 
-                                row["latitude_deg"], 
-                                row["longitude_deg"])])
-    return haversine_distance(given_lat, given_lon, lat, lon)
-
-
-def amadeus_to_dataframe(response, airline_data):
-    """
-    Convert the Amadeus API response to a DataFrame.
-
-    Parameters:
-    - response (list): The response from Amadeus API.
-    - airline_data (DataFrame): Dataframe of airline carriers.
-
-    Returns:
-    - pd.DataFrame: The converted DataFrame.
-    """
-    
-    # List to store flight details
-    flight_data = []
-
-    for flight in response:
-        flight_id = flight['id']
-        source = flight['source']
-        for itinerary in flight['itineraries']:
-            for segment in itinerary['segments']:
-                flight_detail = {
-                    'ID': flight_id,
-                    'Source': source,
-                    'Departure Date': datetime.strptime(
-                        segment['departure'][
-                            'at'], '%Y-%m-%dT%H:%M:%S').strftime('%d/%m/%Y'),
-                    'Departure Terminal': segment[
-                        'departure'].get('terminal', None),
-                    'Departure IATA Code': segment[
-                        'departure']['iataCode'],
-                    'Arrival Date': datetime.strptime(
-                        segment['arrival'][
-                            'at'], '%Y-%m-%dT%H:%M:%S').strftime('%d/%m/%Y'),
-                    'Arrival IATA Code': segment['arrival']['iataCode'],
-                    'Carrier Code': segment['carrierCode'],
-                    'Flight Number': segment['number'],
-                    'Aircraft Code': segment['aircraft']['code'],
-                    'Duration': format_duration(segment['duration']),
-                    'Price Currency': flight['price']['currency'],
-                    'Total Price': flight['price']['total'],
-                    'Base Price': flight['price']['base']
-                }
-                flight_data.append(flight_detail)
-    
-    # Convert to DataFrame
-    df = pd.DataFrame(flight_data)
-    
-    # Merge airlines
-    df = pd.merge(df, airline_data, on=['Carrier Code'], how='left')
-    
-    return df
-        
-def grab_airport_code(data: pd.DataFrame, airport: str) -> Union[str, None]:
-    """
-    Retrieve the IATA code for a given airport name from a DataFrame.
-
-    Parameters:
-    - data (pd.DataFrame): A DataFrame containing airport information.
-    - airport (str): The name of the airport for which the IATA code is to be fetched.
-
-    Returns:
-    - str: The IATA code of the given airport if found. 
-    - None: If the airport name is not present in the DataFrame.
-
-    Raises:
-    - ValueError: If the provided data does not have the required columns.
-    """
-    
-    if not set(['name', 'iata_code']).issubset(data.columns):
-        raise ValueError(
-            "The provided DF must contain 'name' and 'iata_code' columns.")
-    
-    iata_codes = data[data['name'] == airport]['iata_code'].unique()
-
-    if len(iata_codes) == 0:
-        return None
-    
-    return iata_codes[0]
 
 def grab_city(
         data: pd.DataFrame, 
@@ -708,9 +318,10 @@ def get_photo_of_place(
         return f'{constants.PLACE_IMAGE_PATH}/{constants.RHODES_IMAGE}'
     
     # Check if the file already exists
-    if os.path.exists(filepath):
+    if image_exists_in_s3(filepath):
         print(f"Photo for {place_name} already exists as {filepath}")
-        return filepath
+        image = grab_image_s3(filepath)
+        return image
 
     # Step 1: Use the Places API to search for the place and get its photo_reference
     places_endpoint = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
@@ -737,22 +348,36 @@ def get_photo_of_place(
     photo_params = {
         "maxwidth": str(max_width),
         "photoreference": photo_reference,
-        "key": api_key
+        "key": config.GOOGLE_API_KEY
     }
 
     response = requests.get(photo_endpoint, params=photo_params)
     if response.status_code == 200:
-        #with open(filepath, "wb") as f:
-        #    f.write(response.content)
-        save_image_s3(response.content, filepath)
+        image = Image.open(io.BytesIO(response.content))
+        image.format = 'JPEG' 
+        save_image_s3(image, filepath)
         print(f"Photo saved as {filepath}")
     else:
         print("Error fetching the photo")
         return None
     
-    return filepath
+    return image
 
-def create_hotel_dataframe(data):
+def create_hotel_dataframe(
+    data: Dict[str, Union[List[Dict], None]]
+) -> pd.DataFrame:
+    """
+    Create a DataFrame containing hotel details from a given data dictionary.
+
+    :param data: Dictionary containing the hotel details.
+    :type data: Dict[str, Union[List[Dict], None]]
+    
+    :returns: DataFrame containing the extracted hotel details.
+    :rtype: pd.DataFrame
+
+    :raises: None, falls back to reading from a constants.HOTEL_DATA_PATH CSV if DataFrame creation fails.
+    """
+    
     # Extract main details
     details = []
     for entry in data.get('result', []):

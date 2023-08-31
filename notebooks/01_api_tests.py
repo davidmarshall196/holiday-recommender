@@ -405,11 +405,9 @@ import importlib
 importlib.reload(constants)
 import constants
 
-def save_image_s3(
-    image: Image.Image, 
-    file_path: str, 
-    bucket: str = constants.S3_BUCKET,
-    profile_name: Optional[str] = 'david-gmail-acc'
+save_image_s3(image, file_path)
+image_exists_in_s3(filepath)
+filename
 
 def grab_image_s3( 
     file_path: str, 
@@ -422,5 +420,10 @@ def grab_data_s3(
     profile_name: Optional[str] = 'david-gmail-acc'
     
     
+    filename = api_functions.get_photo_of_place(
+        f"{place_country['Place']}, {place_country['Country']}", 
+        config.GOOGLE_API_KEY
+    )    
     
+
     
