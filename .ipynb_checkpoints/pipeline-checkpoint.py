@@ -170,5 +170,3 @@ class TripPlanner:
             latitude = self.given_lat,
             longitude = self.given_lon
         )
-
-            
