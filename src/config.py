@@ -1,12 +1,16 @@
 
 import boto3
 import os
+from src import constants
 
-session = boto3.Session(
-    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-    region_name='eu-west-2'
-)
+if constants.LOCAL_MODE:
+    session = boto3.Session(profile_name='david-gmail-acc')
+else:
+    session = boto3.Session(
+        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+        region_name='eu-west-2'
+    )
 
 def get_parameter(parameter_name):
     ssm_client = session.client('ssm')

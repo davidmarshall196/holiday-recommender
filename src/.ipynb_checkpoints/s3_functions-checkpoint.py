@@ -33,11 +33,14 @@ def grab_data_s3(
     :raises PartialCredentialsError: If credentials are incomplete.
     """
     try:
-        session = boto3.Session(
-            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-            region_name='eu-west-2'
-        )
+        if constants.LOCAL_MODE:
+            session = boto3.Session(profile_name='david-gmail-acc')
+        else:
+            session = boto3.Session(
+                aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                region_name='eu-west-2'
+            )
         s3 = session.client('s3')  # Create a connection to S3
         obj = s3.get_object(Bucket=bucket, Key=file_path)  # Get object and file from bucket
         airports = pd.read_csv(obj['Body'])
@@ -70,11 +73,14 @@ def grab_image_s3(
     :raises Exception: If the file is not a JPEG or another unexpected error occurs.
     """
     try:
-        session = boto3.Session(
-            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-            region_name='eu-west-2'
-        )
+        if constants.LOCAL_MODE:
+            session = boto3.Session(profile_name='david-gmail-acc')
+        else:
+            session = boto3.Session(
+                aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                region_name='eu-west-2'
+            )
         s3 = session.client('s3')  # Create a connection to S3
         obj = s3.get_object(Bucket=bucket, Key=file_path)  # Get object and file from bucket
         image_stream = io.BytesIO(obj['Body'].read())
@@ -122,11 +128,14 @@ def save_image_s3(
         image.save(image_stream, format='JPEG')
 
         # Create a boto3 session and client for S3
-        session = boto3.Session(
-            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-            region_name='eu-west-2'
-        )
+        if constants.LOCAL_MODE:
+            session = boto3.Session(profile_name='david-gmail-acc')
+        else:
+            session = boto3.Session(
+                aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                region_name='eu-west-2'
+            )
         s3 = session.client('s3')  # Create a connection to S3
 
         # Upload the image to the specified bucket and file path
@@ -163,11 +172,14 @@ def image_exists_in_s3(
     :raises PartialCredentialsError: If credentials are incomplete.
     """
     try:
-        session = boto3.Session(
-            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-            region_name='eu-west-2'
-        )
+        if constants.LOCAL_MODE:
+            session = boto3.Session(profile_name='david-gmail-acc')
+        else:
+            session = boto3.Session(
+                aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                region_name='eu-west-2'
+            )
         s3 = session.client('s3')
         s3.head_object(Bucket=bucket, Key=file_path)
         return True

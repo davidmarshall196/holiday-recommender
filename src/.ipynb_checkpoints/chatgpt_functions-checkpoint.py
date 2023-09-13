@@ -105,7 +105,7 @@ def get_lat_lon(place: str, country: str) -> Optional[Dict[str, float]]:
     Returns:
     - dict or None: A dictionary containing the latitude and longitude if found, otherwise None.
     """
-    geolocator = Nominatim(user_agent="geoapiExercises")
+    geolocator = Nominatim(user_agent="geoapi-hol-recommender")
     location = geolocator.geocode(f"{place}, {country}")
     
     if location:
