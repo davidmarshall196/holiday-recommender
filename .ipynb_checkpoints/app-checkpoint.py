@@ -106,8 +106,8 @@ selected_airport = st.sidebar.selectbox(
 col1, col2 = st.columns(2)
 
 # Main action button
-if return_date > departure_date and departure_date > date.today() and rooms <= (children + adults) and st.sidebar.button(
-    'Go'):
+if return_date > departure_date and departure_date > date.today() and rooms <= (
+    children + adults) and st.sidebar.button('Go'):
     
     # Initialize a new TripPlanner object
     trip_planner = pipeline.TripPlanner(

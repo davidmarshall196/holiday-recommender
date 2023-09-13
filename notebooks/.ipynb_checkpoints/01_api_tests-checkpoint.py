@@ -171,8 +171,8 @@ url = "https://apidojo-booking-v1.p.rapidapi.com/properties/list-by-map"
 querystring = {"arrival_date":"2023-10-01","departure_date":"2023-10-08","room_qty":"1","guest_qty":"1","bbox":"14.291283,14.948423,120.755688,121.136864","search_id":"none","children_age":"11,5","price_filter_currencycode":"USD","categories_filter":"class::1,class::2,class::3","languagecode":"en-us","travel_purpose":"leisure","children_qty":"2","order_by":"popularity"}
 
 headers = {
-	"X-RapidAPI-Key": "0352880adbmshdd982fa19f87c97p12948djsn735a6b2b8176",
-	"X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com"
+    "X-RapidAPI-Key": "0352880adbmshdd982fa19f87c97p12948djsn735a6b2b8176",
+    "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com"
 }
 
 response = requests.get(url, headers=headers, params=querystring)
@@ -405,7 +405,8 @@ import importlib
 importlib.reload(constants)
 import constants
 
+save_image_s3(image, file_path)
+image_exists_in_s3(filepath)
+filename
 
-
-
-
+    
