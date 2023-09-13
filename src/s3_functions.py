@@ -8,6 +8,7 @@ from botocore.exceptions import (
 )
 from PIL import Image
 import io
+import os
 
 # import constants
 from src import constants
