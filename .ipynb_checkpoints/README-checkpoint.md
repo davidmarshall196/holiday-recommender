@@ -16,7 +16,7 @@ This Streamlit application uses GPT-3 (ChatGPT) by OpenAI to recommend holiday d
 
 ## Deployment
 
-The application is deployed at ...
+The application is deployed at https://holiday-recommender.streamlit.app/
 
 ## Usage
 
@@ -30,5 +30,12 @@ This project is licensed under the MIT License.
 
 ## Acknowledgements
 
-- Thanks to OpenAI for the GPT-3 model
+- Thanks to OpenAI for the GPT models
 - Thanks to Streamlit for the web framework
+
+## To do list
+- Concurrent requests
+- Unit tests
+- Extention for free text box with content
+- Logging and reporting of usage statistics
+- Deployment

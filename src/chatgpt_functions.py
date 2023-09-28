@@ -80,7 +80,7 @@ def fetch_and_extract_destination(
     
         # Fetch the recommendation from OpenAI
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=constants.GPT_MODEL,
             messages=[{"role": "system", "content": system_msg},
                   {"role": "user", "content": user_msg}],
             max_tokens=500)

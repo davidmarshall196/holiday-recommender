@@ -51,7 +51,7 @@ def create_hotel_dataframe(
         df['Score'] = df['Score'].replace('nan: ', '')
         return df
     except:
-        data = grab_data_s3(constants.HOTEL_DATA_PATH)
+        data = s3_functions.grab_data_s3(constants.HOTEL_DATA_PATH)
         return data
 
 def fetch_hotels_by_location(
