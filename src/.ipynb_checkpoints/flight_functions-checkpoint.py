@@ -221,8 +221,6 @@ def grab_city(
     
     return cities[0]
 
-# Default to cloud icon
-
 def parse_duration(duration_str):
     """
     Parse the flight duration string and return the total duration in minutes.
@@ -246,7 +244,7 @@ def format_flight_row(grouped_df):
     """
     
     # Get the departure and arrival times from the first and last segments
-    departure_date = datetime.strptime(grouped_df.iloc[0]['Departure Date'], "%d/%m/%Y")
+    departure_date = datetime.strptime(grouped_df.iloc[0]['Departure Date'][0:10], "%d/%m/%Y")
     departure_time = grouped_df.iloc[0]['Departure Date'].split()[-1]
     arrival_time = grouped_df.iloc[-1]['Arrival Date'].split()[-1]
     
