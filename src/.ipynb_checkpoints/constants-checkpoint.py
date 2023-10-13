@@ -6,6 +6,7 @@ AIRLINES_DATA_PATH = 'data/airlines_small.csv'
 GPT_MODEL = 'gpt-4'
 
 S3_BUCKET = 'holiday-recommender-app'
+LOGGING_BUCKET = 'recommender-tracking'
 
 RHODES_SATELLITE_NAME = 'rhodes_map.jpg'
 RHODES_IMAGE = 'Rhodes_Greece.jpg'
