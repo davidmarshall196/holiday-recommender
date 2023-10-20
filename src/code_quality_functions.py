@@ -1,13 +1,10 @@
 from typing import Union
 import subprocess
 import pytest
-import os
 
 
 def run_unit_tests(
-    test_file: str, 
-    src_folder: str, 
-    cov_folder: str = None
+    test_file: str, src_folder: str, cov_folder: str = None
 ) -> Union[int, None]:
     """
     Run unit tests using pytest.
@@ -23,7 +20,7 @@ def run_unit_tests(
     """
     try:
         # Change directory to source code folder
-        #os.chdir(f"{src_folder}")
+        # os.chdir(f"{src_folder}")
 
         # Set up pytest command
         pytest_command = [
@@ -35,8 +32,7 @@ def run_unit_tests(
         ]
 
         if cov_folder:
-            pytest_command.extend([
-                "--cov=" + cov_folder, "--cov-report=term-missing"])
+            pytest_command.extend(["--cov=" + cov_folder, "--cov-report=term-missing"])
 
         # Run pytest
         retcode = pytest.main(pytest_command)
@@ -69,8 +65,7 @@ def run_code_quality_checks(
         black_cmd = ["black", src_folder]
         if exclude_folder:
             black_cmd.extend(["--exclude", exclude_folder])
-        black = subprocess.run(
-            black_cmd, capture_output=True, text=True, check=True)
+        black = subprocess.run(black_cmd, capture_output=True, text=True, check=True)
         print("Black Output:")
         print(black.stderr)
 
@@ -85,8 +80,7 @@ def run_code_quality_checks(
         ]
         if exclude_folder:
             flake8_cmd.extend([f"--exclude={exclude_folder}"])
-        flakey = subprocess.run(
-            flake8_cmd, capture_output=True, text=True)
+        flakey = subprocess.run(flake8_cmd, capture_output=True, text=True)
         print("\nFlake8 Output:")
         if flakey.stdout == "":
             print("Done. Flake8 has no improvements!")

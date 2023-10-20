@@ -2,67 +2,75 @@ from typing import Union, Dict
 import requests
 from src import constants
 
+
 def get_weather(
-    lat: float,
-    lon: float,
-    weather_api_key: str
+    lat: float, lon: float, weather_api_key: str
 ) -> Dict[str, Union[str, float]]:
     """
     Fetch weather information for a given city using OpenWeatherMap's API.
-    
+
     Parameters:
     - city_name (str): The name of the city to fetch the weather for.
     - weather_api_key (str): The API key to access OpenWeatherMap's API.
-    
+
     Returns:
-    - dict: A dictionary containing temperature, pressure, humidity, and weather description.
-    
+    - dict: A dictionary containing temperature, pressure, humidity,
+    and weather description.
+
     Raises:
     - requests.RequestException: If there's an issue with the API request.
-    - ValueError: If the city is not found or the API responds with an unexpected status.
+    - ValueError: If the city is not found or the API responds
+    with an unexpected status.
     """
     if constants.TESTING:
-        weather_dict = {'Temperature': 27.49,
-                        'Feels Like': 28.29, 
-                        'Pressure': 1010, 
-                        'Humidity': 55, 
-                        'Wind Speed': 2.89,
-                        'Weather Description': 'clear sky'}
+        weather_dict = {
+            "Temperature": 27.49,
+            "Feels Like": 28.29,
+            "Pressure": 1010,
+            "Humidity": 55,
+            "Wind Speed": 2.89,
+            "Weather Description": "clear sky",
+        }
         return weather_dict
-        
+
     else:
-        metric = 'metric'
+        metric = "metric"
         base_url = "https://api.openweathermap.org/data/2.5/weather?"
-        complete_url = f"{base_url}lat={lat}&lon={lon}&units={metric}&appid={weather_api_key}"
-    
+        complete_url = (
+            f"{base_url}lat={lat}&lon={lon}&units={metric}&appid={weather_api_key}"
+        )
+
         try:
             response = requests.get(complete_url)
             response.raise_for_status()  # Raise an exception for HTTP errors
-        
+
             data = response.json()
-        
+
             if data["cod"] == 200:
                 main_data = data["main"]
                 weather_data = data["weather"][0]
-                wind = data['wind']
+                wind = data["wind"]
                 weather_dict = {
                     "Temperature": main_data["temp"],
                     "Feels Like": main_data["feels_like"],
                     "Pressure": main_data["pressure"],
                     "Humidity": main_data["humidity"],
-                    "Wind Speed":wind['speed'],
-                    "Weather Description": weather_data["description"]
+                    "Wind Speed": wind["speed"],
+                    "Weather Description": weather_data["description"],
                 }
-            
+
                 return weather_dict
             elif data["cod"] == "404":
                 raise ValueError("City not found.")
             else:
                 raise ValueError(
-                    f"Unexpected response from API: {data.get('message', 'Unknown error')}")
+                    f"""Unexpected response from API:
+                    {data.get('message', 'Unknown error')}"""
+                )
         except requests.RequestException as e:
             raise e from None
-            
+
+
 def weather_icon(description: str) -> str:
     """
     Maps a weather description to a corresponding font-awesome icon.
@@ -83,8 +91,6 @@ def weather_icon(description: str) -> str:
         "thunderstorm": ":thunder_cloud_and_rain:",
         "snow": ":snowflake:",
         "mist": ":foggy:",
-        "overcast clouds": ":cloud:"
+        "overcast clouds": ":cloud:",
     }
-    return icons.get(description, ":cloud:")  
-        
-        
+    return icons.get(description, ":cloud:")

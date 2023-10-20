@@ -1,8 +1,7 @@
 import pytest
 import requests
-from src import (
-    weather_functions, constants
-)
+from src import weather_functions, constants
+
 
 def test_get_weather(mocker):
     # Mock requests.get method
@@ -10,17 +9,12 @@ def test_get_weather(mocker):
 
     # Mock successful API response
     mocked_response = mocker.Mock()
-    mocked_response.raise_for_status.return_value = None 
+    mocked_response.raise_for_status.return_value = None
     mocked_response.json.return_value = {
         "cod": 200,
-        "main": {
-            "temp": 27.5,
-            "feels_like": 28.3,
-            "pressure": 1010,
-            "humidity": 55
-        },
+        "main": {"temp": 27.5, "feels_like": 28.3, "pressure": 1010, "humidity": 55},
         "weather": [{"description": "clear sky"}],
-        "wind": {"speed": 2.89}
+        "wind": {"speed": 2.89},
     }
     mocked_get.return_value = mocked_response
 
@@ -32,23 +26,22 @@ def test_get_weather(mocker):
         "Pressure": 1010,
         "Humidity": 55,
         "Wind Speed": 2.89,
-        "Weather Description": "clear sky"
+        "Weather Description": "clear sky",
     }
 
     # Mock 404 API response
-    mocked_response.json.return_value = {
-        "cod": "404",
-        "message": "city not found"
-    }
+    mocked_response.json.return_value = {"cod": "404", "message": "city not found"}
     with pytest.raises(ValueError, match="City not found."):
         weather_functions.get_weather(51.5074, -0.1278, "your_api_key_here")
 
     # Mock unexpected API response
     mocked_response.json.return_value = {
         "cod": "500",
-        "message": "internal server error"
+        "message": "internal server error",
     }
-    with pytest.raises(ValueError, match="Unexpected response from API: internal server error"):
+    with pytest.raises(
+        ValueError, match="Unexpected response from API: internal server error"
+    ):
         weather_functions.get_weather(51.5074, -0.1278, "your_api_key_here")
 
     # Mock requests.RequestException
@@ -60,14 +53,15 @@ def test_get_weather(mocker):
     constants.TESTING = True
     weather_dict = weather_functions.get_weather(51.5074, -0.1278, "your_api_key_here")
     assert weather_dict == {
-        'Temperature': 27.49,
-        'Feels Like': 28.29,
-        'Pressure': 1010,
-        'Humidity': 55,
-        'Wind Speed': 2.89,
-        'Weather Description': 'clear sky'
+        "Temperature": 27.49,
+        "Feels Like": 28.29,
+        "Pressure": 1010,
+        "Humidity": 55,
+        "Wind Speed": 2.89,
+        "Weather Description": "clear sky",
     }
     constants.TESTING = False
+
 
 def test_weather_icon():
     # Test each icon mapping
