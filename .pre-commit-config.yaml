@@ -1,0 +1,16 @@
+repos:
+-   repo: https://github.com/pycqa/flake8
+    rev: '3.9.2'
+    hooks:
+    -   id: flake8
+        args: ['--ignore=E203', '--max-line-length=88']
+        files: '.*\.py'
+
+-   repo: local
+    hooks:
+    -   id: pytest
+        name: Run pytest with coverage
+        entry: ./run_tests.sh
+        language: script
+        types: [python]
+        files: '.*\.py'
