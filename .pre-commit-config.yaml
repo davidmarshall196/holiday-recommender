@@ -3,7 +3,7 @@ repos:
     rev: '3.9.2'
     hooks:
     -   id: flake8
-        args: ['--ignore=E203', '--max-line-length=88']
+        args: ['--ignore=E203,W503', '--max-line-length=88']
         files: '.*\.py'
 
 -   repo: local

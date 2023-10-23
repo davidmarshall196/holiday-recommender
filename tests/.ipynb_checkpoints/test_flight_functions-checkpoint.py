@@ -18,34 +18,39 @@ def test_format_duration():
 
 def test_haversine_distance():
     # Test some known distances
-    assert pytest.approx(
-        flight_functions.haversine_distance(52.5200, 13.4050, 48.8566, 2.3522), 878
+    assert (
+        flight_functions.haversine_distance(52.5200, 13.4050, 48.8566, 2.3522)
+        == pytest.approx(878, 1)
     )  # Berlin to Paris
-    assert pytest.approx(
-        flight_functions.haversine_distance(34.0522, -118.2437, 36.7783, -119.4179), 329
+    assert (
+        flight_functions.haversine_distance(34.0522, -118.2437, 36.7783, -119.4179)
+        == pytest.approx(329, 1)
     )  # LA to Fresno
-    assert pytest.approx(
-        flight_functions.haversine_distance(40.7128, -74.0060, 34.0522, -118.2437), 3940
+    assert (
+        flight_functions.haversine_distance(40.7128, -74.0060, 34.0522, -118.2437)
+        == pytest.approx(3940, 1)
     )  # NYC to LA
-    assert pytest.approx(
-        flight_functions.haversine_distance(37.7749, -122.4194, 34.0522, -118.2437), 559
+    assert (
+        flight_functions.haversine_distance(37.7749, -122.4194, 34.0522, -118.2437)
+        == pytest.approx(559, 1)
     )  # SF to LA
 
     # Test zero distance (same point)
     assert (
-        flight_functions.haversine_distance(52.5200, 13.4050, 52.5200, 13.4050) == 0.0
+        flight_functions.haversine_distance(52.5200, 13.4050, 52.5200, 13.4050)
+        == 0.0
     )
 
     # Test negative coordinates
-    assert pytest.approx(
-        flight_functions.haversine_distance(-34.6037, -58.3816, -33.8688, 151.2093),
-        11520,
+    assert (
+        flight_functions.haversine_distance(-34.6037, -58.3816, -33.8688, 151.2093)
+        == pytest.approx(11520, 20)
     )  # Buenos Aires to Sydney
 
     # Test large distance (almost antipodal points)
-    assert pytest.approx(
-        flight_functions.haversine_distance(37.7749, -122.4194, -37.8136, 144.9631),
-        12658,
+    assert (
+        flight_functions.haversine_distance(37.7749, -122.4194, -37.8136, 144.9631)
+        == pytest.approx(12658, 20)
     )  # SF to Melbourne
 
 
@@ -99,17 +104,17 @@ def test_find_nearest_airport():
         "longitude_deg": 13.287778,
     }
 
-    assert pytest.approx(
-        flight_functions.find_nearest_airport(airport_row, 52.5200, 13.4050), 8.0, 0.1
-    )
+    assert flight_functions.find_nearest_airport(
+        airport_row, 52.5200, 13.4050
+    ) == pytest.approx(9.1, 0.1)
 
-    assert pytest.approx(
-        flight_functions.find_nearest_airport(airport_row, 48.8566, 2.3522), 1050, 1
-    )
+    assert flight_functions.find_nearest_airport(
+        airport_row, 48.8566, 2.3522
+    ) == pytest.approx(1050, 1)
 
-    assert pytest.approx(
-        flight_functions.find_nearest_airport(airport_row, 40.7128, -74.0060), 6370, 10
-    )
+    assert flight_functions.find_nearest_airport(
+        airport_row, 40.7128, -74.0060
+    ) == pytest.approx(6370, 10)
 
 
 def test_grab_airport_code():
@@ -123,21 +128,17 @@ def test_grab_airport_code():
             "iata_code": ["JFK", "LAX"],
         }
     )
-
     # Test valid airport names
     assert (
         flight_functions.grab_airport_code(
             airport_data, "John F. Kennedy International Airport"
-        )
-        == "JFK"
+        ) == "JFK"
     )
     assert (
         flight_functions.grab_airport_code(
             airport_data, "Los Angeles International Airport"
-        )
-        == "LAX"
+        ) == "LAX"
     )
-
     # Test an invalid airport name
     assert flight_functions.grab_airport_code(airport_data, "Invalid Airport") is None
 
@@ -156,10 +157,10 @@ def test_grab_airport_code():
             invalid_data, "John F. Kennedy International Airport"
         )
     assert (
-        str(exc_info.value)
-        == "The provided DF must contain 'name' and 'iata_code' columns."
+        str(
+            exc_info.value
+        ) == "The provided DF must contain 'name' and 'iata_code' columns."
     )
-
     # Test empty DataFrame
     empty_data = pd.DataFrame()
     with pytest.raises(ValueError) as exc_info:

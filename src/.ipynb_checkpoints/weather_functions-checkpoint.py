@@ -63,9 +63,9 @@ def get_weather(
             elif data["cod"] == "404":
                 raise ValueError("City not found.")
             else:
+                premessage = "Unexpected response from API"
                 raise ValueError(
-                    f"""Unexpected response from API:
-                    {data.get('message', 'Unknown error')}"""
+                    f"{premessage} {data.get('message', 'Unknown error')}"
                 )
         except requests.RequestException as e:
             raise e from None

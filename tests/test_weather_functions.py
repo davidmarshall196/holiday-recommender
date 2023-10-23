@@ -40,7 +40,7 @@ def test_get_weather(mocker):
         "message": "internal server error",
     }
     with pytest.raises(
-        ValueError, match="Unexpected response from API: internal server error"
+        ValueError, match="Unexpected response from API internal server error"
     ):
         weather_functions.get_weather(51.5074, -0.1278, "your_api_key_here")
 
