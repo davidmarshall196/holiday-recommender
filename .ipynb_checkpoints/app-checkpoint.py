@@ -7,6 +7,7 @@ from datetime import date, timedelta
 import time
 import textwrap
 import os
+import json
 
 # Import package
 import pipeline
@@ -14,7 +15,8 @@ from src import (
     constants,
     config,
     s3_functions,
-    weather_functions
+    weather_functions,
+    logging_helpers
 )
 
 # poetry run streamlit run /Users/david@inawisdom.com/Documents/Training/travel_app/app.py
@@ -109,6 +111,22 @@ col1, col2 = st.columns(2)
 if return_date > departure_date and departure_date > date.today() and rooms <= (
     children + adults) and st.sidebar.button('Go'):
     
+    # Log User Inputs
+    input_data = {
+        'weather': weather,
+        'activity': activity,
+        'food': food,
+        'price': price,
+        'currency': currency,
+        'airport': selected_airport,
+        'adults': adults,
+        'children': children,
+        'rooms': rooms,
+        'departure_date': str(departure_date),
+        'return_date': str(return_date)
+    }
+    logging_helpers.log_event('user_input', input_data)
+    
     # Initialize a new TripPlanner object
     trip_planner = pipeline.TripPlanner(
         weather=weather, 
@@ -128,6 +146,25 @@ if return_date > departure_date and departure_date > date.today() and rooms <= (
 
     # Execute methods on the trip_planner object
     trip_planner.fetch_and_plan_trip()
+    
+    # Log Outputs
+    output_data = {
+        'recommended_destination': {
+            'place': trip_planner.place_country['Place'],
+            'country': trip_planner.place_country['Country'],
+            'Description': trip_planner.text
+        },
+        'weather_info': trip_planner.weather_data,
+        'flight_details': {
+            'outbound': trip_planner.outbound_flight_df.to_json(
+                orient='records', lines=True),
+            'return': trip_planner.return_flight_df.to_json(
+                orient='records', lines=True)
+        },
+        'hotels': trip_planner.hotels.to_json(
+            orient='records', lines=True)
+    }
+    logging_helpers.log_event('user_output', output_data)
     
     # Col1
     with col1:

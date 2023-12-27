@@ -1,7 +1,7 @@
 # ChatGPT Powered Holiday Destination Recommender
 
 ## Introduction
-This Streamlit application uses GPT-3 (ChatGPT) by OpenAI to recommend holiday destinations based on user preferences. The app also integrates with various data sources like flight information, airline data, and weather information to provide a comprehensive holiday planning experience.
+This Streamlit application uses GPT-4 (ChatGPT) by OpenAI to recommend holiday destinations based on user preferences. The app also integrates with various data sources like flight information, airline data, and weather information to provide a comprehensive holiday planning experience.
 
 ## Features
 
@@ -12,11 +12,16 @@ This Streamlit application uses GPT-3 (ChatGPT) by OpenAI to recommend holiday d
 - Dynamic weather information from OpenWeather Map
 - User-friendly date selection for departure and return
 - Price filter
-- Customizable number of adults, children, and rooms
+- Customisable number of adults, children, and rooms
 
 ## Deployment
 
-The application is deployed at ...
+The application is deployed at https://holiday-recommender.streamlit.app/
+
+### Details
+- Deployed via the [Streamlit Community Cloud](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app)
+- Enforced minimum 70% coverage of unit tests
+- Enforced Flake8 linting check
 
 ## Usage
 
@@ -30,12 +35,5 @@ This project is licensed under the MIT License.
 
 ## Acknowledgements
 
-- Thanks to OpenAI for the GPT-3 model
+- Thanks to OpenAI for the GPT models
 - Thanks to Streamlit for the web framework
-
-## To do list
-- Concurrent requests
-- Unit tests
-- Extention for free text box with content
-- Logging and reporting of usage statistics
-- Deployment
