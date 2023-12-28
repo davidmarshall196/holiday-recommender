@@ -16,7 +16,7 @@ BOX_CONSTANT = 0.05
 SLOW_TEXT = False
 TESTING = False
 DROP_CARRIERS = True
-LOCAL_MODE = True
+LOCAL_MODE = False
 
 TESTING_TEXT_CONTENT = """
     I suggest you visit Rhodes, Greece for your holiday.

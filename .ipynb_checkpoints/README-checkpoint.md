@@ -29,11 +29,3 @@ The application is deployed at https://holiday-recommender.streamlit.app/
 2. **Holiday Details**: Choose the number of adults, children, rooms, and the currency you'd like to use.
 3. **Select Airport**: Choose your starting airport.
 4. **Go Button**: Once all preferences are set, click the "Go" button for destination suggestions.
-
-## License
-This project is licensed under the MIT License.
-
-## Acknowledgements
-
-- Thanks to OpenAI for the GPT models
-- Thanks to Streamlit for the web framework
