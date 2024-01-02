@@ -5,7 +5,7 @@ This Streamlit application uses GPT-4 (ChatGPT) by OpenAI to recommend holiday d
 
 ## Features
 
-- Uses GPT-3 to recommend holiday destinations based on weather, activities, and food preferences
+- Uses GPT-4 to recommend holiday destinations based on weather, activities, and food preferences
 - Flights and airlines data sourced from Amadeus
 - Hotel information from Booking.com
 - Images and maps from Google Places API
