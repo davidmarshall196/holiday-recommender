@@ -1,4 +1,4 @@
-
+import pandas as pd
 from typing import Dict, Any, List
 from src import (
     chatgpt_functions,
@@ -132,26 +132,33 @@ class TripPlanner:
             by="Distance")['iata_code'].iloc[0]
     
         # Flight info
-        self.outbound_flight_df, self.airport_type_out = flight_functions.get_flight_offers(
-            self.origin_code_med, 
-            self.origin_code_large,
-            self.destination_code_med, 
-            self.destination_code_large, 
-            self.departure_date,
-            self.airlines,
-            self.adults
-        )
+        try:
+            self.outbound_flight_df, self.airport_type_out = flight_functions.get_flight_offers(
+                self.origin_code_med, 
+                self.origin_code_large,
+                self.destination_code_med, 
+                self.destination_code_large, 
+                self.departure_date,
+                self.airlines,
+                self.adults
+            )
+        except Exception:
+            self.outbound_flight_df, self.airport_type_out = pd.DataFrame(), None
         
         # Flight info
-        self.return_flight_df, self.airport_type_return = flight_functions.get_flight_offers(
-            self.destination_code_med, 
-            self.destination_code_large, 
-            self.origin_code_med, 
-            self.origin_code_large,
-            self.return_date,
-            self.airlines,
-            self.adults
-        )
+        try:
+            self.return_flight_df, self.airport_type_return = flight_functions.get_flight_offers(
+                self.destination_code_med, 
+                self.destination_code_large, 
+                self.origin_code_med, 
+                self.origin_code_large,
+                self.return_date,
+                self.airlines,
+                self.adults
+            )
+        except Exception:
+            self.return_flight_df, self.airport_type_return = pd.DataFrame(), None
+        
     
         # Image
         self.place_image = google_functions.get_photo_of_place(
