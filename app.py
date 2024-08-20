@@ -1,7 +1,7 @@
 
 import streamlit as st
 import openai
-import pydeck as pdk
+import pydeck as pdk 
 import pandas as pd
 from datetime import date, timedelta
 import time
@@ -191,47 +191,48 @@ if return_date > departure_date and departure_date > date.today() and rooms <= (
             f"**Wind Speed:** {trip_planner.weather_data['Wind Speed']} m/s")
     
         # Flights
-        st.title("Flight Details")
+        if trip_planner.outbound_flight_df.shape[0] > 0:
+            st.title("Flight Details")
         
-        # Sub heading
-        if trip_planner.airport_type_out['type'] == 'medium':
-            st.subheader(
-                f"Outbound: {trip_planner.origin_city} to {trip_planner.destination_city_med}")
-        else:
-            st.subheader(
-                f"Outbound: {trip_planner.origin_city} to {trip_planner.destination_city_large}")
-        
-        # Flight data
-        st.write(f"**Starting Airport:** {trip_planner.selected_airport}")
-        
-        if trip_planner.airport_type_out['type'] == 'medium':
-            st.write(f"**Destination Airport:** {trip_planner.nearest_airport_med}")
-        else:
-            st.write(f"**Destination Airport:** {trip_planner.nearest_airport_large}")
-        
-        if trip_planner.outbound_flight_df is not None:
-            st.dataframe(trip_planner.outbound_flight_df)
-        else:
-            st.write(f"**No flights found. Please modify dates or airport.**")
-        
-        # Sub heading
-        if trip_planner.airport_type_out['type'] == 'medium':
-            st.subheader(
-                f"Return: {trip_planner.destination_city_med} to {trip_planner.origin_city}")
-        else:
-            st.subheader(
-                f"Return: {trip_planner.destination_city_large} to {trip_planner.origin_city}")
-
-        # Flight data
-        if trip_planner.airport_type_out['type'] == 'medium':
-            st.write(f"**Starting Airport:** {trip_planner.nearest_airport_med}")
-        else:
-            st.write(f"**Starting Airport:** {trip_planner.nearest_airport_large}")
-        st.write(f"**Destination Airport:** {trip_planner.selected_airport}")
-        if trip_planner.return_flight_df is not None:
-            st.dataframe(trip_planner.return_flight_df)
-        else:
-            st.write(f"**No flights found. Please modify dates or airport.")
+            # Sub heading
+            if trip_planner.airport_type_out['type'] == 'medium':
+                st.subheader(
+                    f"Outbound: {trip_planner.origin_city} to {trip_planner.destination_city_med}")
+            else:
+                st.subheader(
+                    f"Outbound: {trip_planner.origin_city} to {trip_planner.destination_city_large}")
+            
+            # Flight data
+            st.write(f"**Starting Airport:** {trip_planner.selected_airport}")
+            
+            if trip_planner.airport_type_out['type'] == 'medium':
+                st.write(f"**Destination Airport:** {trip_planner.nearest_airport_med}")
+            else:
+                st.write(f"**Destination Airport:** {trip_planner.nearest_airport_large}")
+            
+            if trip_planner.outbound_flight_df is not None:
+                st.dataframe(trip_planner.outbound_flight_df)
+            else:
+                st.write(f"**No flights found. Please modify dates or airport.**")
+            
+            # Sub heading
+            if trip_planner.airport_type_out['type'] == 'medium':
+                st.subheader(
+                    f"Return: {trip_planner.destination_city_med} to {trip_planner.origin_city}")
+            else:
+                st.subheader(
+                    f"Return: {trip_planner.destination_city_large} to {trip_planner.origin_city}")
+    
+            # Flight data
+            if trip_planner.airport_type_out['type'] == 'medium':
+                st.write(f"**Starting Airport:** {trip_planner.nearest_airport_med}")
+            else:
+                st.write(f"**Starting Airport:** {trip_planner.nearest_airport_large}")
+            st.write(f"**Destination Airport:** {trip_planner.selected_airport}")
+            if trip_planner.return_flight_df is not None:
+                st.dataframe(trip_planner.return_flight_df)
+            else:
+                st.write(f"**No flights found. Please modify dates or airport.")
 
     with col2:
         if trip_planner.place_image:
